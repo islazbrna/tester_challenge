@@ -1,6 +1,5 @@
 package cz.czechitas.selenium;
 
-import com.google.common.base.Verify;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -17,13 +16,10 @@ public class TestyEditacePrihlasky {
 
     // Nejdrive konstanty
     private static final String applicationUrl = "http://localhost:3000/";
-
     WebDriver driver;
-
 
     @BeforeEach
     public void setUp() {
-//      System.setProperty("webdriver.gecko.driver", System.getProperty("user.home") + "/Java-Training/Selenium/geckodriver");
         System.setProperty("webdriver.gecko.driver", "C:\\Java-Training\\Selenium\\geckodriver.exe");
         driver = new FirefoxDriver();
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -52,115 +48,90 @@ public class TestyEditacePrihlasky {
         checkButton.click();
 
         String newBaseprice = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[1]/div[3]/div")).getText();
+        displayedSumShowsCorrectSum();
 
-        double alloySurcharge = 2.15;
-        double scrapSurcharge = 3.14;
-        double internalSurcharge = 0.7658;
-        double externalSurcharge = 1;
-        double storageSurcharge = 0.3;
+        String alloySurcharge = "2.15";
+        String scrapSurcharge = "3.14";
+        String internalSurcharge = "0.7658";
+        String externalSurcharge = "1";
+        String storageSurcharge = "0.3";
 
-        WebElement labelInput = driver.findElement(By.xpath("//*[@id='ghost-label-input']"));
-        labelInput.sendKeys(Keys.CONTROL + "a");
-        labelInput.sendKeys(Keys.DELETE);
-        labelInput.sendKeys("Alloy Surcharge");
+        String alloySurchargeString = "Alloy surcharge";
+        String scrapSurchargeString = "Scrap surcharge";
+        String internalSurchargeString = "Internal surcharge";
+        String externalSurchargeString = "External surcharge";
+        String storageSurchargeString = "Storage surcharge";
 
-        WebElement componentPrice = driver.findElement(By.xpath("//*[@id=\"ghost-value-input\"]"));
-        componentPrice.clear();
-        componentPrice.sendKeys("2.15");
-
-        WebElement checkButtonComponents = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]/div[4]/span[2]/i"));
-        checkButtonComponents.click();
-
-        labelInput.sendKeys(Keys.CONTROL + "a");
-        labelInput.sendKeys(Keys.DELETE);
-        labelInput.sendKeys("Scrap Surcharge");
-        componentPrice.clear();
-        componentPrice.sendKeys("3.14");
-        checkButtonComponents.click();
-
-        labelInput.sendKeys(Keys.CONTROL + "a");
-        labelInput.sendKeys(Keys.DELETE);
-        labelInput.sendKeys("Internal Surcharge");
-        componentPrice.clear();
-        componentPrice.sendKeys("0.7658");
-        checkButtonComponents.click();
-
-        labelInput.sendKeys(Keys.CONTROL + "a");
-        labelInput.sendKeys(Keys.DELETE);
-        labelInput.sendKeys("External Surcharge");
-        componentPrice.clear();
-        componentPrice.sendKeys("1");
-        checkButtonComponents.click();
-
-        labelInput.sendKeys(Keys.CONTROL + "a");
-        labelInput.sendKeys(Keys.DELETE);
-        labelInput.sendKeys("Storage Surcharge");
-        componentPrice.clear();
-        componentPrice.sendKeys("0.3");
-        checkButtonComponents.click();
+        enterComponent(alloySurchargeString, alloySurcharge);
+        enterComponent(scrapSurchargeString, scrapSurcharge);
+        enterComponent(internalSurchargeString, internalSurcharge);
+        enterComponent(externalSurchargeString, externalSurcharge);
+        enterComponent(storageSurchargeString, storageSurcharge);
 
         //deletes internal surcharge
         WebElement hoverRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[4]"));
         action.moveToElement(hoverRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[4]/div[4]/span[1]/i"))).click().build().perform();
+        displayedSumShowsCorrectSum();
 
-        //edit price component storage surcharge
-        WebElement storageInput = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[2]/span"));
+        //edit price component storage surcharge - edit the name
+        WebElement storageInput = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[2]"));
         action.moveToElement(storageInput).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[1]/span/i"))).click().build().perform();
         WebElement storageInputEdit = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[2]/input"));
-        storageInputEdit.click();
-        storageInputEdit.clear();
-        storageInputEdit.sendKeys(Keys.CONTROL + "a");
-        storageInputEdit.sendKeys(Keys.DELETE);
+        clearInputField(storageInputEdit);
         storageInputEdit.sendKeys("T");
         WebElement storageInputCheck = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[4]/span[2]/i"));
         storageInputCheck.click();
+
+        String storageInputFromSite = storageInput.getText();
+        Assertions.assertEquals(storageSurchargeString, storageInputFromSite);
 
         //Edit price component: Scrap surcharge
         WebElement scrapRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]"));
         action.moveToElement(scrapRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[1]/span/i"))).click().build().perform();
         WebElement scrapValueInput = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[3]/input"));
-        scrapValueInput.sendKeys(Keys.CONTROL + "a");
-        scrapValueInput.sendKeys(Keys.DELETE);
+        clearInputField(scrapValueInput);
         scrapValueInput.sendKeys("-2.15");
         WebElement checkButtonScrap = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[4]/span[2]/i"));
         checkButtonScrap.click();
 
-
-//        Hover row
-//        Click on ‘Pencil’ icon
-//        Enter new value: -2.15
-//        Click on ‘Check’ icon
-//        Verify Expected Results D.
-
-//        Edit price component: Alloy surcharge
-//        Hover row
-//        Click on ‘Pencil’ icon
-//        Enter new value: 1.79
-//        Click on ‘Check’ icon
-//        Verify Expected Results A.
-
+//      Edit price component: Alloy surcharge
         WebElement alloyRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]"));
         action.moveToElement(alloyRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]/div[1]/span/i"))).click().build().perform();
 
         WebElement alloyValueInput = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]/div[3]/input"));
-        alloyValueInput.sendKeys(Keys.CONTROL + "a");
-        alloyValueInput.sendKeys(Keys.DELETE);
+        clearInputField(alloyValueInput);
         alloyValueInput.sendKeys("1.79");
         WebElement checkButtonAlloy = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]/div[4]/span[2]/i"));
         checkButtonAlloy.click();
         Thread.sleep(4000);
 
-
+        displayedSumShowsCorrectSum();
         Assertions.assertEquals(basePriceValueFloatString, newBaseprice);
+    }
 
+    public void enterComponent(String nameOfComponent, String priceOfComponent) {
+        WebElement labelInput = driver.findElement(By.xpath("//*[@id='ghost-label-input']"));
+        WebElement componentPrice = driver.findElement(By.xpath("//*[@id=\"ghost-value-input\"]"));
+        WebElement checkButtonComponents = driver.findElement(By.xpath("//*[@id=\"ghost-check-icon\"]"));
+        clearInputField(labelInput);
+        labelInput.sendKeys(nameOfComponent);
+        componentPrice.clear();
+        componentPrice.sendKeys(priceOfComponent);
+        checkButtonComponents.click();
+    }
+
+    public void clearInputField(WebElement inputField){
+        inputField.sendKeys(Keys.CONTROL + "a");
+        inputField.sendKeys(Keys.DELETE);
+    }
+
+    public void displayedSumShowsCorrectSum (){
         List<WebElement> componentsPrices = driver.findElements(By.xpath("//div[contains(@class,'text-right')]"));
         float totalPrices = 0;
         for (int i = 1; i < componentsPrices.size(); i++) {
             WebElement oneComponent = componentsPrices.get(i);
             float addPrices = Float.parseFloat(oneComponent.getText());
             totalPrices += addPrices;
-            System.out.println(oneComponent.getText());
-            System.out.println(totalPrices);
         }
 
         DecimalFormat totalPricesTwoDecimals = new DecimalFormat("#.00");
@@ -168,17 +139,8 @@ public class TestyEditacePrihlasky {
 
         WebElement totalPrice = driver.findElement(By.xpath("/html/body/div/div/div/div/span"));
         String totalPriceFromPageString = totalPrice.getText();
-        totalPriceFromPageString= totalPriceFromPageString.replace(".", ",");
-        System.out.println(totalPriceFromPageString);
-        //float totalPriceFloat = Float.parseFloat(totalPrice.getText());
+        totalPriceFromPageString = totalPriceFromPageString.replace(".", ",");
         Assertions.assertEquals(totalPriceFromPageString, totalPricesCalculatedString);
-
-//        int nalezenyRadekCislo = -1;
-//        for (int i = 0; i < bunkySeJmenyDeti.size(); i++) {
-//            WebElement bunka = bunkySeJmenyDeti.get(i);
-//            if (bunka.getText().equals("Jitka Dite1621055190111")) {
-//                nalezenyRadekCislo = i;
-
     }
 
 
@@ -187,14 +149,3 @@ public class TestyEditacePrihlasky {
         //browser.close();
     }
 }
-
-//
-//        WebElement potvrzeniPrihlasky = prohlizec.findElement(By.xpath("//div[@class='toast-message']"));
-//        String text = potvrzeniPrihlasky.getText();
-//        Assertions.assertTrue(text.startsWith("Žák "));
-//        Assertions.assertTrue(text.endsWith(" byl úspěšně upraven"));
-//
-//        prohlizec.navigate().to(adresaEditacniStranky);
-//        WebElement polickoPoznamky2 = prohlizec.findElement(By.id("note"));
-//        String puvodniTextPoznamky = polickoPoznamky2.getAttribute("value");
-//        Assertions.assertEquals(puvodniTextPoznamky, novyTextPoznamky);
