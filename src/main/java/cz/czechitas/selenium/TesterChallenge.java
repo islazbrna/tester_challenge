@@ -97,10 +97,8 @@ public class TesterChallenge {
         //Expected result D - Value cannot be negative
         WebElement scrapValueInputAfter = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[3]"));
         String scrapValueInputTextInputFromSite = scrapValueInputAfter.getText();
-        boolean isValueNegative = scrapValueInputTextInputFromSite.contains("-");
-        System.out.println(isValueNegative);
-        System.out.println(scrapValueInputTextInputFromSite);
-        Assertions.assertEquals(false, isValueNegative);
+        boolean valueIsNotPositive = scrapValueInputTextInputFromSite.contains("-");
+        Assertions.assertEquals(false, valueIsNotPositive);
         Assertions.assertEquals(scrapSurcharge, scrapValueInputTextInputFromSite);
 
         //Edit price component: Alloy surcharge
@@ -141,14 +139,12 @@ public class TesterChallenge {
             float addPrices = Float.parseFloat(oneComponent.getText());
             totalPrices += addPrices;
         }
-
         DecimalFormat totalPricesTwoDecimals = new DecimalFormat("#.00");
         String totalPricesCalculatedString = totalPricesTwoDecimals.format(totalPrices);
-
         WebElement totalPrice = driver.findElement(By.xpath("/html/body/div/div/div/div/span"));
-        String totalPriceFromPageString = totalPrice.getText();
-        totalPriceFromPageString = totalPriceFromPageString.replace(".", ",");
-        Assertions.assertEquals(totalPriceFromPageString, totalPricesCalculatedString);
+        String totalPriceFromSiteString = totalPrice.getText();
+        totalPriceFromSiteString = totalPriceFromSiteString.replace(".", ",");
+        Assertions.assertEquals(totalPriceFromSiteString, totalPricesCalculatedString);
     }
 
     public void checkNumberOfDecimals() {
@@ -156,8 +152,6 @@ public class TesterChallenge {
         for (int i = 1; i < componentsPrices.size(); i++) {
             WebElement oneComponent = componentsPrices.get(i);
             String getPricesString = oneComponent.getText();
-
-
             String[] array = getPricesString.split("\\.");
             boolean correctLength;
             if (array[1].length() == 1) {
@@ -177,7 +171,6 @@ public class TesterChallenge {
             WebElement oneComponentLabel = componentsLabels.get(i);
             String oneComponentLabelString = oneComponentLabel.getText();
             boolean correctLengthLabelBoolean = true;
-
             if (oneComponentLabelString.length() >= 3) {
                 correctLengthLabelBoolean = true;
             } else if (oneComponentLabelString.length() <= 2) {
