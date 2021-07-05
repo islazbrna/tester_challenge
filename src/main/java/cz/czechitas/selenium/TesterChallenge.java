@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class TestyEditacePrihlasky {
+public class TesterChallenge {
     private static final String applicationUrl = "http://localhost:3000/";
     WebDriver driver;
 
@@ -27,7 +27,7 @@ public class TestyEditacePrihlasky {
     }
 
     @Test
-    public void userShouldBeAbleToChangeBaseprice() {
+    public void userShouldBeAbleToAddAndEditItems() {
         int basePriceValue = 5;
         String basePriceValueString = Integer.toString(basePriceValue);
         Actions action = new Actions(driver);
