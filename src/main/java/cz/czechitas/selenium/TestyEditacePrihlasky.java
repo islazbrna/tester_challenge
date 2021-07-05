@@ -8,13 +8,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class TestyEditacePrihlasky {
-
-    // Nejdrive konstanty
     private static final String applicationUrl = "http://localhost:3000/";
     WebDriver driver;
 
@@ -27,27 +27,20 @@ public class TestyEditacePrihlasky {
     }
 
     @Test
-    public void userShouldBeAbleToChangeBaseprice() throws InterruptedException {
-        //pak oddelat ten threadsleep a tady to throws
+    public void userShouldBeAbleToChangeBaseprice() {
         int basePriceValue = 5;
         String basePriceValueString = Integer.toString(basePriceValue);
-
-        float basePriceValueFloat = (float) (basePriceValue);
-        String basePriceValueFloatString = Float.toString(basePriceValueFloat);
-
         Actions action = new Actions(driver);
-        WebElement basePriceArea = driver.findElement(By.xpath("//*[@id=\"BasePrice\"]"));
-        action.moveToElement(basePriceArea).moveToElement(driver.findElement(By.xpath("//html/body/div/div/div/ul/div[1]/div[1]/span/i"))).click().build().perform();
-
+        WebElement basePriceRow = driver.findElement(By.xpath("//*[@id=\"BasePrice\"]"));
+        action.moveToElement(basePriceRow).moveToElement(driver.findElement(By.xpath("//html/body/div/div/div/ul/div[1]/div[1]/span/i"))).click().build().perform();
         WebElement valueInput = driver.findElement(By.xpath("//*[@id=\"base-value-input\"]"));
         valueInput.click();
         valueInput.clear();
         valueInput.sendKeys(basePriceValueString);
-
         WebElement checkButton = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[1]/div[4]/span[2]/i"));
         checkButton.click();
 
-        String newBaseprice = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[1]/div[3]/div")).getText();
+        //Expected results A - Displayed sum shows correct sum
         displayedSumShowsCorrectSum();
 
         String alloySurcharge = "2.15";
@@ -68,45 +61,60 @@ public class TestyEditacePrihlasky {
         enterComponent(externalSurchargeString, externalSurcharge);
         enterComponent(storageSurchargeString, storageSurcharge);
 
+        //Expected results B - Displayed values of price components are rounded correctly
+        checkNumberOfDecimals();
+
         //deletes internal surcharge
-        WebElement hoverRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[4]"));
-        action.moveToElement(hoverRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[4]/div[4]/span[1]/i"))).click().build().perform();
+        WebElement internalSurchargeRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[4]"));
+        action.moveToElement(internalSurchargeRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[4]/div[4]/span[1]/i"))).click().build().perform();
+
+        //Expected results A - Displayed sum shows correct sum
         displayedSumShowsCorrectSum();
 
         //edit price component storage surcharge - edit the name
-        WebElement storageInput = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[2]"));
-        action.moveToElement(storageInput).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[1]/span/i"))).click().build().perform();
+        WebElement storagesurchargeRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[2]"));
+        action.moveToElement(storagesurchargeRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[1]/span/i"))).click().build().perform();
         WebElement storageInputEdit = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[2]/input"));
         clearInputField(storageInputEdit);
         storageInputEdit.sendKeys("T");
         WebElement storageInputCheck = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[5]/div[4]/span[2]/i"));
         storageInputCheck.click();
 
-        String storageInputFromSite = storageInput.getText();
+        //Expected result C - Label input validation
+        checkLengthOfLabels();
+        String storageInputFromSite = storagesurchargeRow.getText();
         Assertions.assertEquals(storageSurchargeString, storageInputFromSite);
 
         //Edit price component: Scrap surcharge
-        WebElement scrapRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]"));
-        action.moveToElement(scrapRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[1]/span/i"))).click().build().perform();
+        WebElement scrapSurchargeRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]"));
+        action.moveToElement(scrapSurchargeRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[1]/span/i"))).click().build().perform();
         WebElement scrapValueInput = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[3]/input"));
         clearInputField(scrapValueInput);
         scrapValueInput.sendKeys("-2.15");
         WebElement checkButtonScrap = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[4]/span[2]/i"));
         checkButtonScrap.click();
 
-//      Edit price component: Alloy surcharge
+        //Expected result D - Value cannot be negative
+        WebElement scrapValueInputAfter = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[3]/div[3]"));
+        String scrapValueInputTextInputFromSite = scrapValueInputAfter.getText();
+        boolean isValueNegative = scrapValueInputTextInputFromSite.contains("-");
+        System.out.println(isValueNegative);
+        System.out.println(scrapValueInputTextInputFromSite);
+        Assertions.assertEquals(false, isValueNegative);
+        Assertions.assertEquals(scrapSurcharge, scrapValueInputTextInputFromSite);
+
+        //Edit price component: Alloy surcharge
         WebElement alloyRow = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]"));
         action.moveToElement(alloyRow).moveToElement(driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]/div[1]/span/i"))).click().build().perform();
-
         WebElement alloyValueInput = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]/div[3]/input"));
         clearInputField(alloyValueInput);
         alloyValueInput.sendKeys("1.79");
         WebElement checkButtonAlloy = driver.findElement(By.xpath("/html/body/div/div/div/ul/div[2]/div[4]/span[2]/i"));
         checkButtonAlloy.click();
-        Thread.sleep(4000);
+        checkNumberOfDecimals();
 
+        //Expected results A - Displayed sum shows correct sum
         displayedSumShowsCorrectSum();
-        Assertions.assertEquals(basePriceValueFloatString, newBaseprice);
     }
 
     public void enterComponent(String nameOfComponent, String priceOfComponent) {
@@ -120,12 +128,12 @@ public class TestyEditacePrihlasky {
         checkButtonComponents.click();
     }
 
-    public void clearInputField(WebElement inputField){
+    public void clearInputField(WebElement inputField) {
         inputField.sendKeys(Keys.CONTROL + "a");
         inputField.sendKeys(Keys.DELETE);
     }
 
-    public void displayedSumShowsCorrectSum (){
+    public void displayedSumShowsCorrectSum() {
         List<WebElement> componentsPrices = driver.findElements(By.xpath("//div[contains(@class,'text-right')]"));
         float totalPrices = 0;
         for (int i = 1; i < componentsPrices.size(); i++) {
@@ -143,9 +151,45 @@ public class TestyEditacePrihlasky {
         Assertions.assertEquals(totalPriceFromPageString, totalPricesCalculatedString);
     }
 
+    public void checkNumberOfDecimals() {
+        List<WebElement> componentsPrices = driver.findElements(By.xpath("//div[contains(@class,'text-right')]"));
+        for (int i = 1; i < componentsPrices.size(); i++) {
+            WebElement oneComponent = componentsPrices.get(i);
+            String getPricesString = oneComponent.getText();
+
+
+            String[] array = getPricesString.split("\\.");
+            boolean correctLength;
+            if (array[1].length() == 1) {
+                correctLength = true;
+            } else if (array[1].length() == 2) {
+                correctLength = true;
+            } else {
+                correctLength = false;
+            }
+            Assertions.assertEquals(true, correctLength);
+        }
+    }
+
+    public void checkLengthOfLabels() {
+        List<WebElement> componentsLabels = driver.findElements(By.xpath("//div[contains(@class,'flex-grow flex flex-col')]"));
+        for (int i = 0; i < componentsLabels.size() - 1; i++) {
+            WebElement oneComponentLabel = componentsLabels.get(i);
+            String oneComponentLabelString = oneComponentLabel.getText();
+            boolean correctLengthLabelBoolean = true;
+
+            if (oneComponentLabelString.length() >= 3) {
+                correctLengthLabelBoolean = true;
+            } else if (oneComponentLabelString.length() <= 2) {
+                correctLengthLabelBoolean = false;
+            }
+            Assertions.assertEquals(true, correctLengthLabelBoolean);
+        }
+    }
 
     @AfterEach
     public void tearDown() {
-        //browser.close();
+        driver.close();
     }
+
 }
